@@ -259,7 +259,7 @@
                 resultBadge: "✦ Video Encontrado ✦",
                 btnDownloadLink: "DESCARGAR (SIN MARCA DE AGUA)",
                 aboutTitle: "❖ Acerca de TikLoader",
-                aboutDesc: "TikLoader is una plataforma moderna de descarga web diseñada específicamente para descargar videos de TikTok instantáneamente sin complicaciones.",
+                aboutDesc: "TikLoader es una plataforma moderna de descarga web diseñada específicamente para descargar videos de TikTok instantáneamente sin complicaciones.",
                 howTitle: "❖ Cómo descargar videos",
                 step1: "Abre la aplicación TikTok y busca el video que deseas descargar.",
                 step2: "Haz clic en el botón Compartir y selecciona Copiar enlace.",
@@ -295,7 +295,7 @@
                 feat3: "100% percuma tanpa sebarang caj tersembunyi, tiada had harian, dan tidak perlu mendaftar.",
                 feat4: "Menggunakan sambungan API Peribadi khas untuk prestasi platform yang stabil setiap masa.",
                 feat5: "Mengekalkan resolusi tertinggi yang tersedia di server tanpa menjejaskan kualiti visual asal.",
-                feat6: "Dilindungi oleh penyulitan penuh dari hujung ke ujung demi menjaga privasi mutlak anda."
+                feat6: "Dilindungi oleh penyulitan penuh dari hujung ke hujung demi menjaga privasi mutlak anda."
             },
             vi: {
                 mainHeroText: "Trình Tải Video TikTok 100% Miễn Phí",
@@ -430,36 +430,38 @@
                 
                 document.getElementById('videoTitle').innerText = data.title || "TikTok Video";
                 
-                // === INI EMBEDDED JAVASCRIPT BLOB DOWNLOADER (ANTI-PREVIEW TAB BARU) ===
+                // === JALUR UTAMA OPTIMALISASI KUALITAS HD + BLOB DOWNLOADER ===
                 const linkNoWm = document.getElementById('linkNoWm');
                 
-                // Intersepsi klik pada tombol download hijau
+                // Deteksi prioritas link HD dari respon API TikWM
+                const highQualityUrl = data.hd_url || data.download_url_hd || data.play || data.download_url;
+
                 linkNoWm.onclick = async (e) => {
-                    e.preventDefault(); // Kunci jalur buka tab baru browser
+                    e.preventDefault(); // Blokir pembukaan tab baru browser
                     
                     const originalText = document.getElementById('btnDownloadLink').innerText;
-                    document.getElementById('btnDownloadLink').innerText = "DOWNLOADING... ⏳";
+                    document.getElementById('btnDownloadLink').innerText = "DOWNLOADING HD... ⏳";
                     linkNoWm.classList.add('opacity-70', 'pointer-events-none');
                     
                     try {
-                        // Tarik file video biner (Blob) langsung di background
-                        const videoResp = await fetch(data.download_url);
+                        // Tarik file video HD mentah (Blob) langsung di background
+                        const videoResp = await fetch(highQualityUrl);
                         const blob = await videoResp.blob();
                         
-                        // Eksekusi virtual click injection ke direktori memori lokal
+                        // Buat URL virtual lokal untuk pemicu unduhan otomatis
                         const blobUrl = window.URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = blobUrl;
-                        a.download = `TikLoader-${Date.now()}.mp4`; // Nama file otomatis tersimpan
+                        a.download = `TikLoader-HD-${Date.now()}.mp4`; 
                         document.body.appendChild(a);
                         a.click();
                         
-                        // Pembersihan alokasi cache memori browser
+                        // Hapus dan bersihkan sisa cache memori agar HP tidak berat
                         document.body.removeChild(a);
                         window.URL.revokeObjectURL(blobUrl);
                     } catch (err) {
-                        // Bypass fallback otomatis jika terjadi pembatasan CORS eksternal browser
-                        window.open(data.download_url, '_blank');
+                        // Jalur cadangan darurat jika browser memblokir request lokal (CORS)
+                        window.open(highQualityUrl, '_blank');
                     } finally {
                         document.getElementById('btnDownloadLink').innerText = originalText;
                         linkNoWm.classList.remove('opacity-70', 'pointer-events-none');
@@ -478,4 +480,4 @@
         }
     </script>
 </body>
-                                </html>
+</html>
