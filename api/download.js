@@ -1,13 +1,12 @@
 const axios = require('axios');
 
 module.exports = async (req, res) => {
-    // Mengaktifkan CORS Head Manual untuk Environment Vercel Serverless
+    // Atur CORS Biar JavaScript di index.html bisa download lancar tanpa kena block browser
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-    // Handle preflight request CORS
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
@@ -15,35 +14,36 @@ module.exports = async (req, res) => {
 
     const videoUrl = req.query.url;
 
-    // Validasi input link video
     if (!videoUrl) {
-        return res.status(400).json({ error: 'URL tidak boleh kosong, bre!' });
+        return res.status(400).json({ error: 'Parameter URL tidak ditemukan, bre!' });
     }
 
     try {
-        // Request data ke target provider TikWM API
-        const response = await axios.post('https://www.tikwm.com/api/', {
-            url: videoUrl
-        }, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+        // Kita tembak API TikWM dengan parameter hd=1 biar dipaksa ngeluarin kualitas super tajam!
+        const response = await axios.post('https://www.tikwm.com/api/', null, {
+            params: {
+                url: videoUrl,
+                hd: 1 // <--- KUNCI RAHASIA ANTI BURIK!
             }
         });
 
-        const result = response.data;
+        const data = response.data.data;
 
-        // Cek integritas response data dari API provider
-        if (result.code === 0 && result.data) {
-            return res.status(200).json({
-                title: result.data.title || "TikTok Video",
-                download_url: result.data.play // Direct link No-Watermark HD
-            });
-        } else {
-            return res.status(500).json({ error: 'Gagal mengekstrak video. Pastikan link valid!' });
+        if (!data) {
+            return res.status(404).json({ error: 'Video gagal diproses atau tidak ditemukan.' });
         }
 
+        // Ambil jalur link kualitas paling tinggi yang disediakan server
+        const highQualityUrl = data.hdplay || data.play || data.download_url;
+
+        // Kirim data bersih ke frontend index.html
+        return res.status(200).json({
+            title: data.title,
+            download_url: highQualityUrl // Ini dijamin link kualitas HD murni!
+        });
+
     } catch (error) {
-        console.error('Vercel Function Error:', error.message);
-        return res.status(500).json({ error: 'Terjadi kesalahan pada server internal backend Vercel.' });
+        console.error(error);
+        return res.status(500).json({ error: 'Terjadi kesalahan pada server cloud Vercel.' });
     }
 };
