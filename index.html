@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikLoader - Fast & Clean TikTok Downloader</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .loader {
+            border-top-color: #d946ef;
+            animation: spinner 1s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between items-center font-sans tracking-normal selection:bg-purple-500/30 selection:text-purple-200">
+
+    <nav class="w-full bg-slate-900/80 border-b border-slate-800/80 backdrop-blur-md sticky top-0 z-50 px-4 py-4 flex justify-between items-center">
+        <div class="text-xl font-black tracking-tight bg-gradient-to-r from-purple-400 to-fuchsia-500 bg-clip-text text-transparent">
+            TikLoader
+        </div>
+        
+        <div class="relative">
+            <select onchange="changeLang(this.value)" id="langSelect" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300 font-medium focus:outline-none focus:border-purple-500 transition-all cursor-pointer appearance-none pr-8">
+                <option value="id">🌐 Indonesia</option>
+                <option value="en">🌐 English</option>
+                <option value="es">🌐 Español</option>
+                <option value="ms">🌐 Melayu</option>
+                <option value="vi">🌐 Tiếng Việt</option>
+                <option value="tl">🌐 Filipino</option>
+                <option value="ja">🌐 日本語</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500 text-[9px]">
+                ▼
+            </div>
+        </div>
+    </nav>
+
+    <div class="w-full max-w-md p-4 flex-1 flex flex-col justify-center">
+        
+        <div class="text-center mt-8 mb-4 pb-2 px-1 flex flex-col items-center">
+            <h1 id="mainHeroText" class="text-3xl font-black tracking-tight bg-gradient-to-t from-slate-400 via-slate-200 to-white bg-clip-text text-transparent leading-none drop-shadow-[0_2px_10px_rgba(255,255,255,0.05)]">
+                Video TikTok Downloader 100% Gratis
+            </h1>
+            <p id="subHeroText" class="text-xs text-slate-400 mt-3 leading-relaxed font-medium tracking-wide max-w-[90%]">
+                Mendownload video TikTok tanpa watermark dengan mudah. Tempel URL video untuk mendownload tanpa watermark.
+            </p>
+        </div>
+        
+        <div class="bg-slate-900/60 border border-slate-800 p-6 rounded-3xl shadow-2xl shadow-purple-950/10 backdrop-blur-md mt-12">
+            
+            <div class="text-center mb-8 flex flex-col items-center">
+                <img src="logo.png" alt="TikLoader Logo" class="w-24 h-24 object-contain mb-2 drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]" onerror="this.style.display='none'; document.getElementById('fallback-text').classList.remove('hidden');">
+                
+                <div id="fallback-text" class="hidden text-center">
+                    <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-purple-400 to-fuchsia-500 bg-clip-text text-transparent">
+                        TikLoader
+                    </h1>
+                    <p id="subTitle" class="text-xs text-slate-400 font-medium tracking-wider uppercase mt-1">Fast & Clean</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="relative">
+                    <input type="text" id="tiktokUrl" placeholder="Tempel link video TikTok di sini..." 
+                        class="w-full px-4 py-4 bg-slate-950/80 border border-slate-800 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-sm pr-10 shadow-inner">
+                </div>
+                
+                <button id="btnDownload" onclick="fetchVideo()" 
+                    class="w-full py-4 bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 active:scale-[0.98] text-white font-bold rounded-2xl transition-all shadow-lg shadow-purple-900/30 cursor-pointer text-sm tracking-wide">
+                    Ambil Video
+                </button>
+            </div>
+
+            <div id="loading" class="hidden flex flex-col items-center justify-center mt-8 space-y-3 animate-pulse">
+                <div class="loader ease-linear rounded-full border-4 border-slate-800 h-10 w-10"></div>
+                <p id="loadingText" class="text-xs text-slate-400 tracking-wide">Sedang memproses tautan...</p>
+            </div>
+
+            <div id="result" class="hidden mt-8 p-4 bg-slate-950/50 border border-slate-800/80 rounded-2xl space-y-4">
+                <div class="flex flex-col items-center text-center space-y-2">
+                    <span id="resultBadge" class="px-2.5 py-1 bg-purple-500/10 text-purple-400 text-[10px] font-bold uppercase tracking-wider rounded-md border border-purple-500/20">
+                        ✦ Video Ditemukan ✦
+                    </span>
+                    <p id="videoTitle" class="text-sm font-medium line-clamp-2 text-slate-300 px-2"></p>
+                </div>
+                
+                <div class="pt-2">
+                    <a id="linkNoWm" href="#" target="_blank" 
+                        class="block w-full text-center py-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-emerald-900/20">
+                        <span id="btnDownloadLink">DOWNLOAD (NO WATERMARK)</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <br><br>
+
+        <div class="block py-4">
+            <div class="bg-slate-900/40 border border-slate-800/60 p-6 rounded-3xl shadow-xl space-y-8">
+                <div>
+                    <h2 id="aboutTitle" class="text-sm font-bold text-purple-400 mb-2 text-center">❖ Tentang TikLoader</h2>
+                    <p id="aboutDesc" class="text-xs text-slate-400 leading-relaxed text-center">
+                        TikLoader adalah platform web downloader modern yang dirancang khusus untuk mengunduh video TikTok secara instan tanpa hambatan. Dikembangkan dengan focus pada kenyamanan pengguna, platform ini memungkinkan siapa saja untuk menyimpan video favorit mereka langsung ke penyimpanan perangkat dalam hitungan detik. Cukup tempel tautan, klik tombol, dan video siap dinikmati kapan saja.
+                    </p>
+                </div>
+
+                <div class="border-t border-b border-slate-800/60 py-6 space-y-4">
+                    <h2 id="howTitle" class="text-sm font-bold text-purple-400 text-center">❖ Cara Mengunduh Video</h2>
+                    <div class="space-y-3 text-xs text-slate-400">
+                        <div class="flex items-start gap-2">
+                            <span class="text-purple-400 font-bold">①</span>
+                            <span id="step1">Buka aplikasi TikTok dan cari video yang ingin lu unduh.</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-purple-400 font-bold">②</span>
+                            <span id="step2">Klik tombol Bagikan (Share) lalu pilih Salin Tautan (Copy Link).</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-purple-400 font-bold">③</span>
+                            <span id="step3">Kembali ke halaman web TikLoader, lalu tempel (*paste*) tautan ke dalam kolom input di atas.</span>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="text-purple-400 font-bold">④</span>
+                            <span id="step4">Klik tombol Ambil Video dan tunggu beberapa detik sampai tombol unduhan akhir muncul.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-10 py-2">
+                    <h2 id="featuresTitle" class="text-sm font-bold text-purple-400 text-center">❖ Keunggulan Fitur</h2>
+                    
+                    <div class="space-y-10 text-center flex flex-col items-center">
+                        
+                        <div class="flex flex-col items-center max-w-[90%]">
+                            <svg class="w-8 h-8 text-purple-400 mb-2 drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M11.5 22C11.2 22 11 21.8 10.9 21.5L9 13H4.5C4.1 13 3.8 12.7 3.8 12.3C3.8 12 3.9 11.7 4.2 11.5L12.2 2.5C12.5 2.2 12.9 2.1 13.2 2.3C13.5 2.5 13.6 2.8 13.5 3.2L11.8 11H18.5C18.9 11 19.2 11.2 19.3 11.6C19.4 12 19.3 12.4 19 12.6L12.2 21.6C12 21.9 11.8 22 11.5 22Z"/>
+                            </svg>
+                            <strong class="text-slate-100 text-sm tracking-wide block mb-1">Fast Download</strong>
+                            <span id="feat1" class="text-xs text-slate-400 leading-relaxed">Sistem langsung memproses tautan video dalam hitungan milidetik dan memberikan direct link unduhan berkecepatan tinggi tanpa buffer panjang.</span>
+                        </div>
+
+                        <div class="flex flex-col items-center max-w-[90%]">
+                            <svg class="w-8 h-8 text-purple-400 mb-2 drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2L14.85 8.36L21.82 9L16.55 13.64L18.12 20.5L12 16.89L5.88 20.5L7.45 13.64L2.18 9L9.15 8.36L12 2Z"/>
+                            </svg>
+                            <strong class="text-slate-100 text-sm tracking-wide block mb-1">Clean Result</strong>
+                            <span id="feat2" class="text-xs text-slate-400 leading-relaxed">Hasil unduhan dari TikLoader dijamin bebas dari logo watermark TikTok yang mengganggu maupun username kreator di pojok video.</span>
+                        </div>
+
+                        <div class="flex flex-col items-center max-w-[90%]">
+                            <svg class="w-8 h-8 text-purple-400 mb-2 drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20 8H16.2C16.7 7.2 17 6.1 17 5C17 2.2 14.8 0 12 0C9.2 0 7 2.2 7 5C7 6.1 7.3 7.2 7.8 8H4C2.9 8 2 8.9 2 10V13C2 13.8 2.5 14.5 3.2 14.8C3.1 15.2 3 15.6 3 16V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V16C21 15.6 20.9 15.2 20.8 14.8C21.5 14.5 22 13.8 22 13V10C22 8.9 21.1 8 20 8ZM12 2C13.7 2 15 3.3 15 5C15 6.7 13.7 8 12 8C10.3 8 9 6.7 9 5C9 3.3 10.3 2 12 2ZM5 10H11V13H5V10ZM5 16H11V21H5V16ZM19 21H13V16H19V21ZM19 13H13V10H19V13Z"/>
+                            </svg>
+                            <strong class="text-slate-100 text-sm tracking-wide block mb-1">100% Free</strong>
+                            <span id="feat3" class="text-xs text-slate-400 leading-relaxed">Semua fitur premium di platform ini bisa dinikmati tanpa biaya, tanpa batasan unduhan harian, dan tanpa perlu mendaftar akun.</span>
+                        </div>
+
+                        <div class="flex flex-col items-center max-w-[90%]">
+                            <svg class="w-8 h-8 text-purple-400 mb-2 drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12.65 10C11.83 7.67 9.61 6 7 6C3.69 6 1 8.69 1 12C1 15.31 3.69 18 7 18C9.61 18 11.83 16.33 12.65 14H17V18H21V14H23V10H12.65ZM7 14C5.9 14 5 13.1 5 12C5 10.9 5.9 10 7 10C8.1 10 9 10.9 9 12C9 13.1 8.1 14 7 14Z"/>
+                            </svg>
+                            <strong class="text-slate-100 text-sm tracking-wide block mb-1">Private API</strong>
+                            <span id="feat4" class="text-xs text-slate-400 leading-relaxed">Menggunakan koneksi Private API khusus yang menjaga kinerja platform tetap stabil, responsif, dan selalu siap digunakan kapan saja.</span>
+                        </div>
+
+                        <div class="flex flex-col items-center max-w-[90%]">
+                            <svg class="w-8 h-8 text-purple-400 mb-2 drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 2H3C1.9 2 1 2.9 1 4V16C1 17.1 1.9 18 3 18H10V20H8V22H16V20H14V18H21C22.1 18 23 17.1 23 16V4C23 2.9 22.1 2 21 2ZM21 16H3V4H21V16Z"/>
+                            </svg>
+                            <strong class="text-slate-100 text-sm tracking-wide block mb-1">Resolution HD</strong>
+                            <span id="feat5" class="text-xs text-slate-400 leading-relaxed">Video yang diunduh akan tetap mempertahankan resolusi tertinggi yang tersedia di server tanpa menurunkan kualitas visual aslinya.</span>
+                        </div>
+
+                        <div class="flex flex-col items-center max-w-[90%]">
+                            <svg class="w-8 h-8 text-purple-400 mb-2 drop-shadow-[0_0_6px_rgba(168,85,247,0.5)]" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 8H17V6C17 3.24 14.76 1 12 1C9.24 1 7 3.24 7 6V8H6C4.9 8 4 8.9 4 10V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM9 6C9 4.34 10.34 3 12 3C13.66 3 15 4.34 15 6V8H9V6ZM18 20H6V10H18V20ZM12 13C10.9 13 10 13.9 10 15C10 16.1 10.9 17 12 17C13.1 17 14 16.1 14 15C14 13.9 13.1 13 12 13Z"/>
+                            </svg>
+                            <strong class="text-slate-100 text-sm tracking-wide block mb-1">E2EE (End-to-End Encryption)</strong>
+                            <span id="feat6" class="text-xs text-slate-400 leading-relaxed">Proses penempelan tautan dilindungi enkripsi penuh. Tidak ada riwayat unduhan atau data pribadi yang disimpan, menjaga privasi aman total.</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="w-full text-center py-6 border-t border-slate-900 mt-12 flex flex-col items-center justify-center gap-1.5">
+        <div class="text-[11px] text-slate-500 tracking-wide">
+          Copyright  &copy; 2026-2027 <span class="font-semibold text-slate-400">TikLoader</span>. All rights reserved.
+        </div>
+        <div class="text-[10px] text-slate-600 font-medium tracking-wider uppercase">
+            Presented by Tikloader Team
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            id: {
+                mainHeroText: "Video TikTok Downloader 100% Gratis",
+                subHeroText: "Mendownload video TikTok tanpa watermark dengan mudah. Tempel URL video untuk mendownload tanpa watermark.",
+                placeholder: "Tempel link video TikTok di sini...",
+                btnDownload: "Ambil Video",
+                subTitle: "Fast & Clean",
+                loadingText: "Sedang memproses tautan...",
+                resultBadge: "✦ Video Ditemukan ✦",
+                btnDownloadLink: "DOWNLOAD (NO WATERMARK)",
+                aboutTitle: "❖ Tentang TikLoader",
+                aboutDesc: "TikLoader adalah platform web downloader modern yang dirancang khusus untuk mengunduh video TikTok secara instan tanpa hambatan. Dikembangkan dengan fokus pada kenyamanan pengguna, platform ini memungkinkan siapa saja untuk menyimpan video favorit mereka langsung ke penyimpanan perangkat dalam hitungan detik. Cukup tempel tautan, klik tombol, dan video siap dinikmati kapan saja.",
+                howTitle: "❖ Cara Mengunduh Video",
+                step1: "Buka aplikasi TikTok dan cari video yang ingin lu unduh.",
+                step2: "Klik tombol Bagikan (Share) lalu pilih Salin Tautan (Copy Link).",
+                step3: "Kembali ke halaman web TikLoader, lalu tempel (*paste*) tautan ke dalam kolom input di atas.",
+                step4: "Klik tombol Ambil Video dan tunggu beberapa detik sampai tombol unduhan akhir muncul.",
+                featuresTitle: "❖ Keunggulan Fitur",
+                feat1: "Sistem langsung memproses tautan video dalam hitungan milidetik dan memberikan direct link unduhan berkecepatan tinggi tanpa buffer panjang.",
+                feat2: "Hasil unduhan dari TikLoader dijamin bebas dari logo watermark TikTok yang mengganggu maupun username kreator di pojok video.",
+                feat3: "Semua fitur premium di platform ini bisa dinikmati tanpa biaya, tanpa batasan unduhan harian, dan tanpa perlu mendaftar akun.",
+                feat4: "Menggunakan koneksi Private API khusus yang menjaga kinerja platform tetap stabil, responsif, dan selalu siap digunakan kapan saja.",
+                feat5: "Video yang diunduh akan tetap mempertahankan resolusi tertinggi yang tersedia di server tanpa menurunkan kualitas visual aslinya.",
+                feat6: "Proses penempelan tautan dilindungi enkripsi penuh. Tidak ada riwayat unduhan atau data pribadi yang disimpan, menjaga privasi aman total."
+            },
+            en: {
+                mainHeroText: "100% Free TikTok Video Downloader",
+                subHeroText: "Download TikTok videos without watermark easily. Paste the video URL to download without watermark.",
+                placeholder: "Paste TikTok video link here...",
+                btnDownload: "Get Video",
+                subTitle: "Fast & Clean",
+                loadingText: "Processing link...",
+                resultBadge: "✦ Video Found ✦",
+                btnDownloadLink: "DOWNLOAD (NO WATERMARK)",
+                aboutTitle: "❖ About TikLoader",
+                aboutDesc: "TikLoader is a modern web downloader platform specifically designed to download TikTok videos instantly without hassle. Built with user comfort in mind, this platform allows anyone to save their favorite videos directly to their device storage in seconds.",
+                howTitle: "❖ How to Download Videos",
+                step1: "Open the TikTok app and find the video you want to download.",
+                step2: "Click the Share button and select Copy Link.",
+                step3: "Return to the TikLoader web page, then paste the link into the input field above.",
+                step4: "Click the Get Video button and wait a few seconds until the final download button appears.",
+                featuresTitle: "❖ Key Features",
+                feat1: "The system processes the video link in milliseconds and provides a high-speed direct download link without long buffering.",
+                feat2: "Downloads from TikLoader are guaranteed to be free of annoying TikTok logos or creator watermarks.",
+                feat3: "All premium features on this platform can be enjoyed completely free, with no daily download limits, and no account registration required.",
+                feat4: "Uses a dedicated Private API connection to keep the platform performance stable, responsive, and always ready for use.",
+                feat5: "Downloaded videos retain the highest available resolution on the server without reducing the original visual quality.",
+                feat6: "The link pasting process is protected by full encryption. No download history or personal data is stored, ensuring total privacy."
+            },
+            es: {
+                mainHeroText: "Descargador de Videos de TikTok 100% Gratis",
+                subHeroText: "Descarga videos de TikTok sin marca de agua fácilmente. Pega la URL del video para descargarlo sin marca de agua.",
+                placeholder: "Pega el enlace de TikTok aquí...",
+                btnDownload: "Obtener Video",
+                subTitle: "Rápido y Limpio",
+                loadingText: "Procesando enlace...",
+                resultBadge: "✦ Video Encontrado ✦",
+                btnDownloadLink: "DESCARGAR (SIN MARCA DE AGUA)",
+                aboutTitle: "❖ Acerca de TikLoader",
+                aboutDesc: "TikLoader es una plataforma moderna de descarga web diseñada específicamente para descargar videos de TikTok instantáneamente sin complicaciones.",
+                howTitle: "❖ Cómo descargar videos",
+                step1: "Abre la aplicación TikTok y busca el video que deseas descargar.",
+                step2: "Haz clic en el botón Compartir y selecciona Copiar enlace.",
+                step3: "Regresa a la página web de TikLoader y pega el enlace en el campo de entrada de arriba.",
+                step4: "Haz clic en el botón Obtener video y espera unos segundos hasta que aparezca el botón de descarga final.",
+                featuresTitle: "❖ Características principales",
+                feat1: "El sistema procesa el enlace en milisegundos y proporciona un enlace de descarga directa de alta velocidad.",
+                feat2: "Las descargas están garantizadas sin logotipos molestos de TikTok ni marcas de agua del creador.",
+                feat3: "Totalmente gratis, sin límites de descarga diaria y sin necesidad de registrarse.",
+                feat4: "Utiliza una conexión API privada dedicada para mantener el rendimiento estable y receptivo.",
+                feat5: "Los videos descargados conservan la resolución más alta disponible en el servidor.",
+                feat6: "El proceso está protegido por un cifrado completo. No se almacena el historial de descargas."
+            },
+            ms: {
+                mainHeroText: "Pengunduh Video TikTok 100% Percuma",
+                subHeroText: "Muat turun video TikTok tanpa tanda air dengan mudah. Tampal URL video untuk muat turun tanpa tanda air.",
+                placeholder: "Tampal pautan video TikTok di sini...",
+                btnDownload: "Ambil Video",
+                subTitle: "Pantas & Bersih",
+                loadingText: "Memproses pautan...",
+                resultBadge: "✦ Video Ditemui ✦",
+                btnDownloadLink: "MUAT TURUN (TIADA WATERMARK)",
+                aboutTitle: "❖ Mengenai TikLoader",
+                aboutDesc: "TikLoader adalah platform muat turun web moden yang direka khas untuk muat turun video TikTok secara sekejap tanpa sebarang sekatan.",
+                howTitle: "❖ Cara Memuat Turun Video",
+                step1: "Buka aplikasi TikTok dan cari video yang ingin anda muat turun.",
+                step2: "Klik butang Kongsi (Share) dan pilih Salin Pautan (Copy Link).",
+                step3: "Kembali ke laman web TikLoader, kemudian tampal pautan ke dalam ruangan input di atas.",
+                step4: "Klik butang Ambil Video dan tunggu beberapa saat sehingga butang muat turun akhir muncul.",
+                featuresTitle: "❖ Kelebihan Ciri",
+                feat1: "Sistem memproses pautan dengan pantas dan menyediakan talian muat turun terus berkelajuan tinggi.",
+                feat2: "Hasil muat turun dijamin bersih daripada logo watermark TikTok atau nama pengguna pencipta.",
+                feat3: "100% percuma tanpa sebarang caj tersembunyi, tiada had harian, dan tidak perlu mendaftar.",
+                feat4: "Menggunakan sambungan API Peribadi khas untuk prestasi platform yang stabil setiap masa.",
+                feat5: "Mengekalkan resolusi tertinggi yang tersedia di server tanpa menjejaskan kualiti visual asal.",
+                feat6: "Dilindungi oleh penyulitan penuh dari hujung ke hujung demi menjaga privasi mutlak anda."
+            },
+            vi: {
+                mainHeroText: "Trình Tải Video TikTok 100% Miễn Phí",
+                subHeroText: "Tải video TikTok không logo hình mờ dễ dàng. Dán URL video để tải xuống không dính watermark.",
+                placeholder: "Dán liên kết TikTok vào đây...",
+                btnDownload: "Tải Video",
+                subTitle: "Nhanh & Sạch",
+                loadingText: "Đang xử lý liên kết...",
+                resultBadge: "✦ Đã Tìm Thấy Video ✦",
+                btnDownloadLink: "TẢI VIDEO (KHÔNG LOGO)",
+                aboutTitle: "❖ Về TikLoader",
+                aboutDesc: "TikLoader là nền tảng tải video TikTok trực tuyến hiện đại, giúp bạn lưu video không dính logo một cách nhanh chóng và dễ dàng nhất.",
+                howTitle: "❖ Cách Tải Video TikTok",
+                step1: "Mở ứng dụng TikTok và tìm video bạn muốn tải xuống.",
+                step2: "Nhấn vào nút Chia sẻ và chọn Sao chép liên kết.",
+                step3: "Quay lại trang web TikLoader, dán liên kết vào ô nhập liệu ở trên.",
+                step4: "Nhấn nút Tải Video và chờ vài giây để hệ thống xuất link tải không watermark.",
+                featuresTitle: "❖ Tính Năng Nổi Bật",
+                feat1: "Xử lý liên kết ngay lập tức và cung cấp đường truyền tải xuống tốc độ cao.",
+                feat2: "Video tải về hoàn toàn sạch sẽ, không bị dính hình mờ logo TikTok khó chịu.",
+                feat3: "Miễn phí 100%, không giới hạn số lượt tải dalam ngày và không cần đăng ký tài khoản.",
+                feat4: "Sử dụng hệ thống Private API chuyên dụng để đảm bảo hệ thống luôn ổn định.",
+                feat5: "Giữ nguyên độ phân giải HD sắc nét ban đầu của video từ máy chủ.",
+                feat6: "Mã hóa bảo mật toàn diện dữ liệu truy cập, không lưu lại lịch sử tải của người dùng."
+            },
+            tl: {
+                mainHeroText: "100% Libreng TikTok Video Downloader",
+                subHeroText: "Mag-download ng mga video mula sa TikTok nang walang watermark nang madali. I-paste ang URL ng video upang mag-download.",
+                placeholder: "I-paste ang link ng TikTok dito...",
+                btnDownload: "Kunan ng Video",
+                subTitle: "Mabilis at Malinis",
+                loadingText: "Prinuproseso ang link...",
+                resultBadge: "✦ Nahanap ang Video ✦",
+                btnDownloadLink: "I-DOWNLOAD (WALANG WATERMARK)",
+                aboutTitle: "❖ Tungkol sa TikLoader",
+                aboutDesc: "Ang TikLoader ay isang modernong web downloader platform na binuo upang mag-download ng mga video mula sa TikTok nang mabilis at walang watermark.",
+                howTitle: "❖ Paano Mag-download ng Video",
+                step1: "Buksan ang TikTok app at hanapin ang video na gusto mong i-download.",
+                step2: "I-click ang Share na button at piliin ang Copy Link.",
+                step3: "Bumalik sa website ng TikLoader, i-paste ang link sa kahon sa itaas.",
+                step4: "Pindutin ang Kunan ng Video button at maghintay ng ilang segundo para sa download link.",
+                featuresTitle: "❖ Mga Tampok na Katangian",
+                feat1: "Mabilis na pagproseso sa loob ng ilang millisecond para sa high-speed download link.",
+                feat2: "Siguradong walang nakakairitang TikTok logo o watermark ng creator ang maiiwan sa video.",
+                feat3: "100% libreng gamitin nang walang limitasyon at hindi nangangailangan ng pag-sign up.",
+                feat4: "Gumagamit ng Private API para manatiling matatag ang server kahit madaming gumagamit.",
+                feat5: "Pinapanatili ang HD na kalidad ng video base sa pinakamataas na resolusyon sa server.",
+                feat6: "Protektado ng End-to-End Encryption ang iyong koneksyon para sa lubos na pribadong paggamit."
+            },
+            ja: {
+                mainHeroText: "100%無料 TikTok動画ダウンロードツール",
+                subHeroText: "TikTokの動画を透かしなしで簡単に保存。動画のURLを貼り付けるだけで、ウォーターマークなしでダウンロードできます。",
+                placeholder: "ここにTikTokのリンクを貼り付け...",
+                btnDownload: "動画を取得",
+                subTitle: "高速 & クリーン",
+                loadingText: "リンクを解析中...",
+                resultBadge: "✦ 動画が見つかりました ✦",
+                btnDownloadLink: "ダウンロード (透かしなし)",
+                aboutTitle: "❖ TikLoaderについて",
+                aboutDesc: "TikLoaderは、TikTokの動画をウォーターマーク（透かし）なしで素早く安全に保存できる現代的なウェブサイトダウンロードツールです。",
+                howTitle: "❖ 動画のダウンロード方法",
+                step1: "TikTokアプリを開き、保存したい動画を見つけます。",
+                step2: "「共有」ボタンをタップし、「リンクをコピー」を選択します。",
+                step3: "TikLoaderに戻り、上の入力欄にコピーしたリンクを貼り付けます。",
+                step4: "「動画を取得」ボタンをクリックし、ダウンロードリンクが表示されるまで数秒待ちます。",
+                featuresTitle: "❖ 主な機能と特徴",
+                feat1: "ミリ秒単位でリンクを処理し、バッファリングなしで高速なダイレクトURLを提供します。",
+                feat2: "不快なTikTokロゴやクリエイター名の透かしを完全に除去したクリーンな動画を保存します。",
+                feat3: "すべての機能を完全無料で提供。1日の制限もなく、登録手続きも一切不要です。",
+                feat4: "専用のプライベートAPIを導入し、アクセス集中時でも常に安定した稼働を維持します。",
+                feat5: "サーバー上の最高画質（HD解像度）をそのまま維持し、映像を劣化させずに保存します。",
+                feat6: "通信はエンドツーエンド暗号化（E2EE）で保護され、履歴は一切保存されないため安心です。"
+            }
+        };
+
+        function changeLang(langCode) {
+            const data = translations[langCode];
+            if (!data) return;
+            
+            document.getElementById('mainHeroText').innerText = data.mainHeroText;
+            document.getElementById('subHeroText').innerText = data.subHeroText;
+            document.getElementById('tiktokUrl').placeholder = data.placeholder;
+            document.getElementById('btnDownload').innerText = data.btnDownload;
+            document.getElementById('subTitle').innerText = data.subTitle;
+            document.getElementById('loadingText').innerText = data.loadingText;
+            document.getElementById('resultBadge').innerText = data.resultBadge;
+            document.getElementById('btnDownloadLink').innerText = data.btnDownloadLink;
+            document.getElementById('aboutTitle').innerText = data.aboutTitle;
+            document.getElementById('aboutDesc').innerText = data.aboutDesc;
+            document.getElementById('howTitle').innerText = data.howTitle;
+            document.getElementById('step1').innerText = data.step1;
+            document.getElementById('step2').innerText = data.step2;
+            document.getElementById('step3').innerText = data.step3;
+            document.getElementById('step4').innerText = data.step4;
+            document.getElementById('featuresTitle').innerText = data.featuresTitle;
+            document.getElementById('feat1').innerText = data.feat1;
+            document.getElementById('feat2').innerText = data.feat2;
+            document.getElementById('feat3').innerText = data.feat3;
+            document.getElementById('feat4').innerText = data.feat4;
+            document.getElementById('feat5').innerText = data.feat5;
+            document.getElementById('feat6').innerText = data.feat6;
+        }
+
+        async function fetchVideo() {
+            const urlInput = document.getElementById('tiktokUrl').value.trim();
+            const btnDownload = document.getElementById('btnDownload');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+
+            if (!urlInput) {
+                alert('Masukkan link TikTok terlebih dahulu, brow!');
+                return;
+            }
+
+            if (!urlInput.includes('tiktok.com')) {
+                alert('Tautan tidak valid! Pastikan memasukkan link dari TikTok.');
+                return;
+            }
+
+            loading.classList.remove('hidden');
+            result.classList.add('hidden');
+            btnDownload.disabled = true;
+            btnDownload.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // URL RELATIF UNTUK VERCEL SERVERLESS
+            const apiUrl = `/api/download?url=${encodeURIComponent(urlInput)}`; 
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Respon server backend bermasalah');
+                
+                const data = await response.json();
+                
+                document.getElementById('videoTitle').innerText = data.title || "TikTok Video";
+                document.getElementById('linkNoWm').href = data.download_url;
+
+                result.classList.remove('hidden');
+            } catch (error) {
+                console.error(error);
+                alert('Gagal mengambil data video. Pastikan konfigurasi Vercel Anda benar.');
+            } finally {
+                loading.classList.add('hidden');
+                btnDownload.disabled = false;
+                btnDownload.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    </script>
+</body>
+</html>
