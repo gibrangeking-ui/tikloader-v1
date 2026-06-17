@@ -259,7 +259,7 @@
                 resultBadge: "✦ Video Encontrado ✦",
                 btnDownloadLink: "DESCARGAR (SIN MARCA DE AGUA)",
                 aboutTitle: "❖ Acerca de TikLoader",
-                aboutDesc: "TikLoader es una plataforma moderna de descarga web diseñada específicamente para descargar videos de TikTok instantáneamente sin complicaciones.",
+                aboutDesc: "TikLoader is una plataforma moderna de descarga web diseñada específicamente para descargar videos de TikTok instantáneamente sin complicaciones.",
                 howTitle: "❖ Cómo descargar videos",
                 step1: "Abre la aplicación TikTok y busca el video que deseas descargar.",
                 step2: "Haz clic en el botón Compartir y selecciona Copiar enlace.",
@@ -295,7 +295,7 @@
                 feat3: "100% percuma tanpa sebarang caj tersembunyi, tiada had harian, dan tidak perlu mendaftar.",
                 feat4: "Menggunakan sambungan API Peribadi khas untuk prestasi platform yang stabil setiap masa.",
                 feat5: "Mengekalkan resolusi tertinggi yang tersedia di server tanpa menjejaskan kualiti visual asal.",
-                feat6: "Dilindungi oleh penyulitan penuh dari hujung ke hujung demi menjaga privasi mutlak anda."
+                feat6: "Dilindungi oleh penyulitan penuh dari hujung ke ujung demi menjaga privasi mutlak anda."
             },
             vi: {
                 mainHeroText: "Trình Tải Video TikTok 100% Miễn Phí",
@@ -420,7 +420,6 @@
             btnDownload.disabled = true;
             btnDownload.classList.add('opacity-50', 'cursor-not-allowed');
 
-            // URL RELATIF UNTUK VERCEL SERVERLESS
             const apiUrl = `/api/download?url=${encodeURIComponent(urlInput)}`; 
 
             try {
@@ -430,7 +429,42 @@
                 const data = await response.json();
                 
                 document.getElementById('videoTitle').innerText = data.title || "TikTok Video";
-                document.getElementById('linkNoWm').href = data.download_url;
+                
+                // === INI EMBEDDED JAVASCRIPT BLOB DOWNLOADER (ANTI-PREVIEW TAB BARU) ===
+                const linkNoWm = document.getElementById('linkNoWm');
+                
+                // Intersepsi klik pada tombol download hijau
+                linkNoWm.onclick = async (e) => {
+                    e.preventDefault(); // Kunci jalur buka tab baru browser
+                    
+                    const originalText = document.getElementById('btnDownloadLink').innerText;
+                    document.getElementById('btnDownloadLink').innerText = "DOWNLOADING... ⏳";
+                    linkNoWm.classList.add('opacity-70', 'pointer-events-none');
+                    
+                    try {
+                        // Tarik file video biner (Blob) langsung di background
+                        const videoResp = await fetch(data.download_url);
+                        const blob = await videoResp.blob();
+                        
+                        // Eksekusi virtual click injection ke direktori memori lokal
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.download = `TikLoader-${Date.now()}.mp4`; // Nama file otomatis tersimpan
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        // Pembersihan alokasi cache memori browser
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(blobUrl);
+                    } catch (err) {
+                        // Bypass fallback otomatis jika terjadi pembatasan CORS eksternal browser
+                        window.open(data.download_url, '_blank');
+                    } finally {
+                        document.getElementById('btnDownloadLink').innerText = originalText;
+                        linkNoWm.classList.remove('opacity-70', 'pointer-events-none');
+                    }
+                };
 
                 result.classList.remove('hidden');
             } catch (error) {
@@ -444,4 +478,4 @@
         }
     </script>
 </body>
-</html>
+                                </html>
